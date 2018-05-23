@@ -770,7 +770,7 @@ var _ = Describe("v3-push Command", func() {
 													Expect(testUI.Out).To(Say("memory usage:\\s+64M x 1"))
 													Expect(testUI.Out).To(Say("routes:\\s+some-other-domain, some-domain"))
 													Expect(testUI.Out).To(Say("stack:\\s+cflinuxfs2"))
-													Expect(testUI.Out).To(Say("(?m)buildpacks:\\s+some-detect-output\n\n"))
+													Expect(testUI.Out).To(Say("(?m)buildpacks:\\s+ruby_buildpack\n\n"))
 
 													Expect(testUI.Out).To(Say("worker:1/1"))
 													Expect(testUI.Out).To(Say("\\s+state\\s+since\\s+cpu\\s+memory\\s+disk"))

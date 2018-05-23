@@ -154,7 +154,7 @@ var _ = Describe("v3-app command", func() {
 		})
 	})
 
-	Context("when the environment is set up correctly", func() {
+	FContext("when the environment is set up correctly", func() {
 		BeforeEach(func() {
 			helpers.SetupCF(orgName, spaceName)
 		})
@@ -167,14 +167,28 @@ var _ = Describe("v3-app command", func() {
 			var domainName string
 
 			BeforeEach(func() {
-				helpers.WithHelloWorldApp(func(appDir string) {
-					Eventually(helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "v3-push", appName)).Should(Exit(0))
+				helpers.WithMultiBuildpackApp(func(appDir string) {
+					// Eventually(helpers.CF("v3-create-app", appName)).Should(Exit(0))
+					// helpers.WriteManifest(filepath.Join(appDir, "manifest.yml"), map[string]interface{}{
+					// 	"applications": []map[string]interface{}{{
+					// 		"name":   appName,
+					// 		"memory": "1G",
+					// 	}},
+					// })
+
+					// Eventually we'll have the '-m' flag and the stuff above can be deleted.
+					Eventually(helpers.CustomCF(
+						helpers.CFEnv{WorkingDirectory: appDir},
+						"v3-push", appName,
+						"-b", "ruby_buildpack",
+						"-b", "go_buildpack",
+					)).Should(Exit(0))
 				})
 
 				domainName = helpers.DefaultSharedDomain()
 			})
 
-			It("displays the app summary", func() {
+			FIt("displays the app summary", func() {
 				userName, _ := helpers.GetCredentials()
 
 				session := helpers.CF("v3-app", appName)
@@ -186,9 +200,11 @@ var _ = Describe("v3-app command", func() {
 				Eventually(session).Should(Say("memory usage:\\s+\\d+[KMG] x 1"))
 				Eventually(session).Should(Say("routes:\\s+%s\\.%s", appName, domainName))
 				Eventually(session).Should(Say("stack:\\s+cflinuxfs2"))
-				Eventually(session).Should(Say("buildpacks:\\s+staticfile"))
+				Eventually(session).Should(Say("buildpacks:\\s+ruby_buildpack,\\s+go_buildpack"))
 				Eventually(session).Should(Say("web:1/1"))
-				Eventually(session).Should(Say("#0\\s+running\\s+\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} [AP]M"))
+				Eventually(session).Should(Say("#0\\s+(running|starting)\\s+\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} [AP]M"))
+				Eventually(session).Should(Say("console:\\d/\\d"))
+				Eventually(session).Should(Say("rake:\\d/\\d"))
 
 				Eventually(session).Should(Exit(0))
 			})

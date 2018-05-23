@@ -162,6 +162,15 @@ func GetAppGuid(appName string) string {
 	return appGuid
 }
 
+func GetV3AppGuid(appName string) string {
+	session := CF("v3-app", appName, "--guid")
+	Eventually(session).Should(Exit(0))
+
+	appGuid := strings.TrimSpace(string(session.Out.Contents()))
+	Expect(appGuid).NotTo(Equal(""))
+	return appGuid
+}
+
 type Assets struct {
 	ServiceBroker string
 }

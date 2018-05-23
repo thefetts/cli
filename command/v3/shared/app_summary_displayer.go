@@ -178,11 +178,7 @@ func (AppSummaryDisplayer) usageSummary(processSummaries v3action.ProcessSummari
 func (AppSummaryDisplayer) buildpackNames(buildpacks []v3action.Buildpack) string {
 	var names []string
 	for _, buildpack := range buildpacks {
-		if buildpack.DetectOutput != "" {
-			names = append(names, buildpack.DetectOutput)
-		} else {
-			names = append(names, buildpack.Name)
-		}
+		names = append(names, buildpack.Name)
 	}
 
 	return strings.Join(names, ", ")

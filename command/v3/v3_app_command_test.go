@@ -349,11 +349,11 @@ var _ = Describe("v3-app Command", func() {
 							Buildpacks: []v3action.Buildpack{
 								{
 									Name:         "ruby_buildpack",
-									DetectOutput: "some-detect-output",
+									DetectOutput: "does-not-matter",
 								},
 								{
 									Name:         "some-buildpack",
-									DetectOutput: "",
+									DetectOutput: "does-not-matter",
 								},
 							},
 						},
@@ -406,11 +406,11 @@ var _ = Describe("v3-app Command", func() {
 							Buildpacks: []v3action.Buildpack{
 								{
 									Name:         "ruby_buildpack",
-									DetectOutput: "some-detect-output",
+									DetectOutput: "does-not-matter",
 								},
 								{
 									Name:         "some-buildpack",
-									DetectOutput: "",
+									DetectOutput: "does-not-matter",
 								},
 							},
 						},
@@ -468,11 +468,11 @@ var _ = Describe("v3-app Command", func() {
 							Buildpacks: []v3action.Buildpack{
 								{
 									Name:         "ruby_buildpack",
-									DetectOutput: "some-detect-output",
+									DetectOutput: "does-not-matter",
 								},
 								{
 									Name:         "some-buildpack",
-									DetectOutput: "",
+									DetectOutput: "does-not-matter",
 								},
 							},
 						},
@@ -551,7 +551,7 @@ var _ = Describe("v3-app Command", func() {
 					Expect(testUI.Out).To(Say("memory usage:\\s+32M x 3, 64M x 1"))
 					Expect(testUI.Out).To(Say("routes:\\s+some-other-domain, some-domain"))
 					Expect(testUI.Out).To(Say("stack:\\s+cflinuxfs2"))
-					Expect(testUI.Out).To(Say("(?m)buildpacks:\\s+some-detect-output, some-buildpack\n\n"))
+					Expect(testUI.Out).To(Say("(?m)buildpacks:\\s+ruby_buildpack, some-buildpack\n\n"))
 					Expect(testUI.Out).To(Say("web:3/3"))
 					Expect(testUI.Out).To(Say("\\s+state\\s+since\\s+cpu\\s+memory\\s+disk"))
 					Expect(testUI.Out).To(Say("#0\\s+running\\s+1978-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} [AP]M\\s+0.0%\\s+976.6K of 32M\\s+976.6K of 1.9M"))
