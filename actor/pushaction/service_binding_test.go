@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Binding Services", func() {
+var _ = FDescribe("Binding Services", func() {
 	var (
 		actor       *Actor
 		fakeV2Actor *pushactionfakes.FakeV2Actor
@@ -35,11 +35,37 @@ var _ = Describe("Binding Services", func() {
 		BeforeEach(func() {
 			config = ApplicationConfig{}
 			config.DesiredApplication.GUID = "some-app-guid"
-			config.CurrentServices = map[string]v2action.ServiceInstance{"service_instance_1": {GUID: "instance_1_guid"}}
-			config.DesiredServices = map[string]v2action.ServiceInstance{
-				"service_instance_1": {GUID: "instance_1_guid"},
-				"service_instance_2": {GUID: "instance_2_guid"},
-				"service_instance_3": {GUID: "instance_3_guid"},
+
+			service1 := v2action.ServiceInstance{
+				GUID: "instance_1_guid",
+			}
+			service2 := v2action.ServiceInstance{
+				GUID: "instance_2_guid",
+			}
+			service3 := v2action.ServiceInstance{
+				GUID: "instance_3_guid",
+			}
+
+			config.CurrentServices = map[string]Service{
+				"service_instance_1": {
+					PushServiceInstance: service1,
+					Position:            0,
+				},
+			}
+
+			config.DesiredServices = map[string]Service{
+				"service_instance_1": {
+					PushServiceInstance: service1,
+					Position:            0,
+				},
+				"service_instance_2": {
+					PushServiceInstance: service2,
+					Position:            0,
+				},
+				"service_instance_3": {
+					PushServiceInstance: service3,
+					Position:            0,
+				},
 			}
 		})
 
@@ -54,13 +80,29 @@ var _ = Describe("Binding Services", func() {
 			})
 
 			It("it updates CurrentServices to match DesiredServices", func() {
+				service1 := v2action.ServiceInstance{
+					GUID: "instance_1_guid",
+				}
+				service2 := v2action.ServiceInstance{
+					GUID: "instance_2_guid",
+				}
+				service3 := v2action.ServiceInstance{
+					GUID: "instance_3_guid",
+				}
+
 				Expect(executeErr).ToNot(HaveOccurred())
 				Expect(warnings).To(ConsistOf("service-instance-warning-1", "service-instance-warning-2"))
 				Expect(boundServices).To(BeTrue())
-				Expect(returnedConfig.CurrentServices).To(Equal(map[string]v2action.ServiceInstance{
-					"service_instance_1": {GUID: "instance_1_guid"},
-					"service_instance_2": {GUID: "instance_2_guid"},
-					"service_instance_3": {GUID: "instance_3_guid"},
+				Expect(returnedConfig.CurrentServices).To(Equal(map[string]Service{
+					"service_instance_1": {
+						PushServiceInstance: service1,
+					},
+					"service_instance_2": {
+						PushServiceInstance: service2,
+					},
+					"service_instance_3": {
+						PushServiceInstance: service3,
+					},
 				}))
 
 				var serviceInstanceGUIDs []string

@@ -147,11 +147,19 @@ var _ = Describe("Apply", func() {
 			})
 
 			Context("when mapping the routes is successful", func() {
-				var desiredServices map[string]v2action.ServiceInstance
+				var desiredServices map[string]Service
 
 				BeforeEach(func() {
-					desiredServices = map[string]v2action.ServiceInstance{
-						"service_1": {Name: "service_1", GUID: "service_guid"},
+					service1 := v2action.ServiceInstance{
+						Name: "service_1",
+						GUID: "service_guid",
+					}
+
+					desiredServices = map[string]Service{
+						"service1": {
+							PushServiceInstance: service1,
+							Position:            0,
+						},
 					}
 					config.DesiredServices = desiredServices
 					fakeV2Actor.MapRouteToApplicationReturns(v2action.Warnings{"map-route-warnings-1", "map-route-warnings-2"}, nil)
@@ -506,8 +514,18 @@ var _ = Describe("Apply", func() {
 
 		Context("when there are no new services", func() {
 			BeforeEach(func() {
-				config.CurrentServices = map[string]v2action.ServiceInstance{"service1": service1}
-				config.DesiredServices = map[string]v2action.ServiceInstance{"service1": service1}
+				config.CurrentServices = map[string]Service{
+					"service1": {
+						PushServiceInstance: service1,
+						Position:            0,
+					},
+				}
+				config.DesiredServices = map[string]Service{
+					"service1": {
+						PushServiceInstance: service1,
+						Position:            0,
+					},
+				}
 			})
 
 			It("should not send the ConfiguringServices or BoundServices event", func() {
@@ -517,8 +535,22 @@ var _ = Describe("Apply", func() {
 
 		Context("when are new services", func() {
 			BeforeEach(func() {
-				config.CurrentServices = map[string]v2action.ServiceInstance{"service1": service1}
-				config.DesiredServices = map[string]v2action.ServiceInstance{"service1": service1, "service2": service2}
+				config.CurrentServices = map[string]Service{
+					"service1": {
+						PushServiceInstance: service1,
+						Position:            0,
+					},
+				}
+				config.DesiredServices = map[string]Service{
+					"service1": {
+						PushServiceInstance: service1,
+						Position:            0,
+					},
+					"service2": {
+						PushServiceInstance: service2,
+						Position:            1,
+					},
+				}
 			})
 
 			Context("when binding services fails", func() {

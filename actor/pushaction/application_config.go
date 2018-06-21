@@ -19,8 +19,8 @@ type ApplicationConfig struct {
 	DesiredRoutes []v2action.Route
 	NoRoute       bool
 
-	CurrentServices map[string]v2action.ServiceInstance
-	DesiredServices map[string]v2action.ServiceInstance
+	CurrentServices map[string]Service
+	DesiredServices map[string]Service
 
 	AllResources       []v2action.Resource
 	MatchedResources   []v2action.Resource
@@ -28,6 +28,11 @@ type ApplicationConfig struct {
 	Archive            bool
 	Path               string
 	DropletPath        string
+}
+
+type Service struct {
+	PushServiceInstance v2action.ServiceInstance
+	Position            int
 }
 
 func (config ApplicationConfig) CreatingApplication() bool {
@@ -169,16 +174,16 @@ func (actor Actor) configureRoutes(manifestApp manifest.Application, orgGUID str
 	}
 }
 
-func (actor Actor) getDesiredServices(currentServices map[string]v2action.ServiceInstance, requestedServices []string, spaceGUID string) (map[string]v2action.ServiceInstance, Warnings, error) {
+func (actor Actor) getDesiredServices(currentServices map[string]Service, requestedServices []string, spaceGUID string) (map[string]Service, Warnings, error) {
 	var warnings Warnings
 
-	desiredServices := map[string]v2action.ServiceInstance{}
-	for name, serviceInstance := range currentServices {
+	desiredServices := map[string]Service{}
+	for name, service := range currentServices {
 		log.Debugln("adding bound service:", name)
-		desiredServices[name] = serviceInstance
+		desiredServices[name] = service
 	}
 
-	for _, serviceName := range requestedServices {
+	for i, serviceName := range requestedServices {
 		if _, ok := desiredServices[serviceName]; !ok {
 			log.Debugln("adding requested service:", serviceName)
 			serviceInstance, serviceWarnings, err := actor.V2Actor.GetServiceInstanceByNameAndSpace(serviceName, spaceGUID)
@@ -187,7 +192,13 @@ func (actor Actor) getDesiredServices(currentServices map[string]v2action.Servic
 				return nil, warnings, err
 			}
 
-			desiredServices[serviceName] = serviceInstance
+			newServices := map[string]Service{
+				serviceName: {
+					PushServiceInstance: serviceInstance,
+					Position:            i,
+				},
+			}
+			desiredServices = newServices
 		}
 	}
 	return desiredServices, warnings, nil
@@ -212,9 +223,17 @@ func (actor Actor) configureExistingApp(config ApplicationConfig, app manifest.A
 		return config, warnings, err
 	}
 
-	nameToService := map[string]v2action.ServiceInstance{}
-	for _, serviceInstance := range serviceInstances {
-		nameToService[serviceInstance.Name] = serviceInstance
+	nameToService := map[string]Service{}
+
+	for i, serviceInstance := range serviceInstances {
+		service := map[string]Service{
+			serviceInstance.Name: {
+				PushServiceInstance: serviceInstance,
+				Position:            i,
+			},
+		}
+
+		nameToService = service
 	}
 
 	config.CurrentRoutes = routes

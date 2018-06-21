@@ -20,7 +20,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Application Config", func() {
+var _ = FDescribe("Application Config", func() {
 	var (
 		actor                   *Actor
 		fakeV2Actor             *pushactionfakes.FakeV2Actor
@@ -230,9 +230,13 @@ var _ = Describe("Application Config", func() {
 					})
 
 					It("sets the bound services", func() {
-						Expect(firstConfig.CurrentServices).To(Equal(map[string]v2action.ServiceInstance{
-							"service-1": v2action.ServiceInstance{Name: "service-1", GUID: "service-instance-1"},
-							"service-2": v2action.ServiceInstance{Name: "service-2", GUID: "service-instance-2"},
+						Expect(firstConfig.CurrentServices).To(Equal(map[string]Service{
+							"service-1": {
+								PushServiceInstance: services[0],
+							},
+							"service-2": {
+								PushServiceInstance: services[1],
+							},
 						}))
 
 						Expect(fakeV2Actor.GetServiceInstancesByApplicationCallCount()).To(Equal(1))
@@ -662,10 +666,19 @@ var _ = Describe("Application Config", func() {
 				It("sets DesiredServices", func() {
 					Expect(executeErr).ToNot(HaveOccurred())
 					Expect(warnings).To(ConsistOf("private-domain-warnings", "shared-domain-warnings", "some-service-warning-1", "some-service-warning-2"))
-					Expect(firstConfig.DesiredServices).To(Equal(map[string]v2action.ServiceInstance{
-						"service_1": v2action.ServiceInstance{Name: "service_1", SpaceGUID: spaceGUID},
-						"service_2": v2action.ServiceInstance{Name: "service_2", SpaceGUID: spaceGUID},
-						"service_3": v2action.ServiceInstance{Name: "service_3", SpaceGUID: spaceGUID},
+					Expect(firstConfig.DesiredServices).To(Equal(map[string]Service{
+						"service_1": {
+							PushServiceInstance: v2action.ServiceInstance{Name: "service_1", SpaceGUID: spaceGUID},
+							Position:            0,
+						},
+						"service_2": {
+							PushServiceInstance: v2action.ServiceInstance{Name: "service_2", SpaceGUID: spaceGUID},
+							Position:            1,
+						},
+						"service_3": {
+							PushServiceInstance: v2action.ServiceInstance{Name: "service_3", SpaceGUID: spaceGUID},
+							Position:            2,
+						},
 					}))
 
 					Expect(fakeV2Actor.GetServiceInstanceByNameAndSpaceCallCount()).To(Equal(1))
