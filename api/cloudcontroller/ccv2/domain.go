@@ -26,6 +26,9 @@ type Domain struct {
 	// DomainType is the access type of the domain. It can be either a domain
 	// private to a single org or it can be a domain shared to all orgs.
 	Type constant.DomainType
+
+	// Internal is whether the domain is internal.
+	Internal bool
 }
 
 // UnmarshalJSON helps unmarshal a Cloud Controller Domain response.
@@ -36,6 +39,7 @@ func (domain *Domain) UnmarshalJSON(data []byte) error {
 			Name            string `json:"name"`
 			RouterGroupGUID string `json:"router_group_guid"`
 			RouterGroupType string `json:"router_group_type"`
+			Internal        string `json:"internal"`
 		} `json:"entity"`
 	}
 	err := cloudcontroller.DecodeJSON(data, &ccDomain)
@@ -47,6 +51,11 @@ func (domain *Domain) UnmarshalJSON(data []byte) error {
 	domain.Name = ccDomain.Entity.Name
 	domain.RouterGroupGUID = ccDomain.Entity.RouterGroupGUID
 	domain.RouterGroupType = constant.RouterGroupType(ccDomain.Entity.RouterGroupType)
+	if ccDomain.Entity.Internal == "true" {
+		domain.Internal = true
+	} else {
+		domain.Internal = false
+	}
 	return nil
 }
 
