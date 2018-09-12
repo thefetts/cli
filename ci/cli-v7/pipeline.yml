@@ -4,7 +4,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cli
-    branch: master
+    branch: vat
     ignore_paths: &ciPaths
     - bin
     - ci
@@ -15,7 +15,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cli
-    branch: master
+    branch: vat
     paths: *ciPaths
 
 jobs:
