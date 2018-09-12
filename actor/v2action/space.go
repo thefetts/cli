@@ -9,6 +9,10 @@ import (
 // Space represents a CLI Space
 type Space ccv2.Space
 
+func (actor Actor) CreateSpace(spaceName, orgName, quotaName string) (Space, Warnings, error) {
+	return Space{}, nil, nil
+}
+
 func (actor Actor) DeleteSpaceByNameAndOrganizationName(spaceName string, orgName string) (Warnings, error) {
 	var allWarnings Warnings
 

@@ -47,7 +47,7 @@ func createSpaceWhenNotAuthorized(orgName, user string) {
 	Eventually(session).Should(Exit(1))
 }
 
-var _ = PDescribe("create-space", func() {
+var _ = FDescribe("create-space", func() {
 	When("invoked with --help", func() {
 		It("displays the help information", func() {
 			session := helpers.CF("create-space", "--help")
