@@ -15,7 +15,7 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 )
 
-var _ = FDescribe("CreateSpaceCommand", func() {
+var _ = PDescribe("CreateSpaceCommand", func() {
 	var (
 		fakeConfig      *commandfakes.FakeConfig
 		fakeActor       *v2fakes.FakeCreateSpaceActor
