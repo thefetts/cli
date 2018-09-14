@@ -24,6 +24,15 @@ resources:
       branch: vat
       paths: *ciPaths
 
+  - name: edge-osx-binary-64
+    type: s3
+    source:
+      bucket: v7-cf-cli-releases
+      access_key_id: ((cli-team-aws-s3-access-key-id))
+      secret_access_key: ((cli-team-aws-s3-secret-access-key))
+      versioned_file: master/cf-cli_edge_osx.tgz
+      region_name: us-west-1
+
 jobs:
   - name: units
     serial: true
@@ -53,3 +62,10 @@ jobs:
         file: cli-ci/ci/cli/tasks/extract-binaries.yml
         input_mapping:
           cf-cli-binaries: compiled
+      - task: create-unix-installers
+        file: cli-ci/ci/cli/tasks/create-installers.yml
+      - task: package-binaries
+        file: cli-ci/ci/cli/tasks/package-binaries.yml
+      - put: edge-osx-binary-64
+        params:
+          file: archives/cf-cli_edge_osx.tgz
