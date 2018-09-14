@@ -1,31 +1,55 @@
 ---
 resources:
-- name: cli
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/cli
-    branch: vat
-    ignore_paths: &ciPaths
-    - bin
-    - ci
-    - integration
-    - Makefile
+  - name: cli
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cli
+      branch: vat
+      ignore_paths: &ciPaths
+        - bin
+        - ci
+        - integration
+        - Makefile
 
-- name: cli-ci
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/cli
-    branch: vat
-    paths: *ciPaths
+  - name: cli-i18n
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cli-i18n
+      branch: master
+
+  - name: cli-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cli
+      branch: vat
+      paths: *ciPaths
 
 jobs:
-- name: units
-  serial: true
-  plan:
-  - aggregate:
-    - get: cli
-      trigger: true
-    - get: cli-ci
-  - aggregate:
-    - task: units-linux
-      file: cli-ci/ci/cli-v7/tasks/units-linux.yml
+  - name: units
+    serial: true
+    plan:
+      - aggregate:
+          - get: cli
+            trigger: true
+          - get: cli-ci
+      - aggregate:
+          - task: units-linux
+            file: cli-ci/ci/cli-v7/tasks/units-linux.yml
+
+  - name: build-binaries
+    serial: true
+    plan:
+      - aggregate:
+          - get: cli
+            trigger: true
+            passed: [units]
+          - get: cli-ci
+          - get: cli-i18n
+      - task: build-i18n
+        file: cli-ci/ci/cli/tasks/generate-i18n-resources.yml
+      - task: build
+        file: cli-ci/ci/cli/tasks/build-binaries.yml
+      - task: extract-binaries
+        file: cli-ci/ci/cli/tasks/extract-binaries.yml
+        input_mapping:
+          cf-cli-binaries: compiled
