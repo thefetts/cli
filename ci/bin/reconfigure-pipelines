@@ -68,4 +68,6 @@ configure_infrastructure_pipeline inf-lovingcup lovingcup-pipeline baked-potato
 configure_infrastructure_pipeline inf-tartine tartine-pipeline baked-potato
 configure_infrastructure_pipeline inf-arsicault arsicault-pipeline deep-fried-potato
 
+configure_infrastructure_pipeline inf-delfina delfina-pipeline mashed-potato
+
 configure_legacy_infrastructure_pipeline inf-homeroom homeroom-pipeline moldy-gnocchi
