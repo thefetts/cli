@@ -8,7 +8,7 @@ import (
 	"code.cloudfoundry.org/cli/command/v3"
 )
 
-type FakeV3CancelDeploymentActor struct {
+type FakeV3CancelZdtPushActor struct {
 	CancelDeploymentByAppNameAndSpaceStub        func(appName string, spaceGUID string) (v3action.Warnings, error)
 	cancelDeploymentByAppNameAndSpaceMutex       sync.RWMutex
 	cancelDeploymentByAppNameAndSpaceArgsForCall []struct {
@@ -36,7 +36,7 @@ type FakeV3CancelDeploymentActor struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpace(appName string, spaceGUID string) (v3action.Warnings, error) {
+func (fake *FakeV3CancelZdtPushActor) CancelDeploymentByAppNameAndSpace(appName string, spaceGUID string) (v3action.Warnings, error) {
 	fake.cancelDeploymentByAppNameAndSpaceMutex.Lock()
 	ret, specificReturn := fake.cancelDeploymentByAppNameAndSpaceReturnsOnCall[len(fake.cancelDeploymentByAppNameAndSpaceArgsForCall)]
 	fake.cancelDeploymentByAppNameAndSpaceArgsForCall = append(fake.cancelDeploymentByAppNameAndSpaceArgsForCall, struct {
@@ -54,19 +54,19 @@ func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpace(appNa
 	return fake.cancelDeploymentByAppNameAndSpaceReturns.result1, fake.cancelDeploymentByAppNameAndSpaceReturns.result2
 }
 
-func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpaceCallCount() int {
+func (fake *FakeV3CancelZdtPushActor) CancelDeploymentByAppNameAndSpaceCallCount() int {
 	fake.cancelDeploymentByAppNameAndSpaceMutex.RLock()
 	defer fake.cancelDeploymentByAppNameAndSpaceMutex.RUnlock()
 	return len(fake.cancelDeploymentByAppNameAndSpaceArgsForCall)
 }
 
-func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpaceArgsForCall(i int) (string, string) {
+func (fake *FakeV3CancelZdtPushActor) CancelDeploymentByAppNameAndSpaceArgsForCall(i int) (string, string) {
 	fake.cancelDeploymentByAppNameAndSpaceMutex.RLock()
 	defer fake.cancelDeploymentByAppNameAndSpaceMutex.RUnlock()
 	return fake.cancelDeploymentByAppNameAndSpaceArgsForCall[i].appName, fake.cancelDeploymentByAppNameAndSpaceArgsForCall[i].spaceGUID
 }
 
-func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpaceReturns(result1 v3action.Warnings, result2 error) {
+func (fake *FakeV3CancelZdtPushActor) CancelDeploymentByAppNameAndSpaceReturns(result1 v3action.Warnings, result2 error) {
 	fake.CancelDeploymentByAppNameAndSpaceStub = nil
 	fake.cancelDeploymentByAppNameAndSpaceReturns = struct {
 		result1 v3action.Warnings
@@ -74,7 +74,7 @@ func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpaceReturn
 	}{result1, result2}
 }
 
-func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpaceReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
+func (fake *FakeV3CancelZdtPushActor) CancelDeploymentByAppNameAndSpaceReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
 	fake.CancelDeploymentByAppNameAndSpaceStub = nil
 	if fake.cancelDeploymentByAppNameAndSpaceReturnsOnCall == nil {
 		fake.cancelDeploymentByAppNameAndSpaceReturnsOnCall = make(map[int]struct {
@@ -88,7 +88,7 @@ func (fake *FakeV3CancelDeploymentActor) CancelDeploymentByAppNameAndSpaceReturn
 	}{result1, result2}
 }
 
-func (fake *FakeV3CancelDeploymentActor) CloudControllerAPIVersion() string {
+func (fake *FakeV3CancelZdtPushActor) CloudControllerAPIVersion() string {
 	fake.cloudControllerAPIVersionMutex.Lock()
 	ret, specificReturn := fake.cloudControllerAPIVersionReturnsOnCall[len(fake.cloudControllerAPIVersionArgsForCall)]
 	fake.cloudControllerAPIVersionArgsForCall = append(fake.cloudControllerAPIVersionArgsForCall, struct{}{})
@@ -103,20 +103,20 @@ func (fake *FakeV3CancelDeploymentActor) CloudControllerAPIVersion() string {
 	return fake.cloudControllerAPIVersionReturns.result1
 }
 
-func (fake *FakeV3CancelDeploymentActor) CloudControllerAPIVersionCallCount() int {
+func (fake *FakeV3CancelZdtPushActor) CloudControllerAPIVersionCallCount() int {
 	fake.cloudControllerAPIVersionMutex.RLock()
 	defer fake.cloudControllerAPIVersionMutex.RUnlock()
 	return len(fake.cloudControllerAPIVersionArgsForCall)
 }
 
-func (fake *FakeV3CancelDeploymentActor) CloudControllerAPIVersionReturns(result1 string) {
+func (fake *FakeV3CancelZdtPushActor) CloudControllerAPIVersionReturns(result1 string) {
 	fake.CloudControllerAPIVersionStub = nil
 	fake.cloudControllerAPIVersionReturns = struct {
 		result1 string
 	}{result1}
 }
 
-func (fake *FakeV3CancelDeploymentActor) CloudControllerAPIVersionReturnsOnCall(i int, result1 string) {
+func (fake *FakeV3CancelZdtPushActor) CloudControllerAPIVersionReturnsOnCall(i int, result1 string) {
 	fake.CloudControllerAPIVersionStub = nil
 	if fake.cloudControllerAPIVersionReturnsOnCall == nil {
 		fake.cloudControllerAPIVersionReturnsOnCall = make(map[int]struct {
@@ -128,7 +128,7 @@ func (fake *FakeV3CancelDeploymentActor) CloudControllerAPIVersionReturnsOnCall(
 	}{result1}
 }
 
-func (fake *FakeV3CancelDeploymentActor) Invocations() map[string][][]interface{} {
+func (fake *FakeV3CancelZdtPushActor) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.cancelDeploymentByAppNameAndSpaceMutex.RLock()
@@ -142,7 +142,7 @@ func (fake *FakeV3CancelDeploymentActor) Invocations() map[string][][]interface{
 	return copiedInvocations
 }
 
-func (fake *FakeV3CancelDeploymentActor) recordInvocation(key string, args []interface{}) {
+func (fake *FakeV3CancelZdtPushActor) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -154,4 +154,4 @@ func (fake *FakeV3CancelDeploymentActor) recordInvocation(key string, args []int
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ v3.V3CancelDeploymentActor = new(FakeV3CancelDeploymentActor)
+var _ v3.V3CancelZdtPushActor = new(FakeV3CancelZdtPushActor)

@@ -20,39 +20,39 @@ import (
 
 var _ = Describe("v3-cancel-deployment Command", func() {
 	var (
-		cmd                         v3.V3CancelDeploymentCommand
-		testUI                      *ui.UI
-		fakeConfig                  *commandfakes.FakeConfig
-		fakeSharedActor             *commandfakes.FakeSharedActor
-		fakeV3CancelDeploymentActor *v3fakes.FakeV3CancelDeploymentActor
-		executeErr                  error
-		app                         string
-		userName                    string
-		spaceName                   string
-		orgName                     string
-		binaryName                  string
+		cmd                      v3.V3CancelZdtPushCommand
+		testUI                   *ui.UI
+		fakeConfig               *commandfakes.FakeConfig
+		fakeSharedActor          *commandfakes.FakeSharedActor
+		fakeV3CancelZdtPushActor *v3fakes.FakeV3CancelZdtPushActor
+		executeErr               error
+		app                      string
+		userName                 string
+		spaceName                string
+		orgName                  string
+		binaryName               string
 	)
 
 	BeforeEach(func() {
 		testUI = ui.NewTestUI(nil, NewBuffer(), NewBuffer())
 		fakeConfig = new(commandfakes.FakeConfig)
 		fakeSharedActor = new(commandfakes.FakeSharedActor)
-		fakeV3CancelDeploymentActor = new(v3fakes.FakeV3CancelDeploymentActor)
+		fakeV3CancelZdtPushActor = new(v3fakes.FakeV3CancelZdtPushActor)
 
 		app = "some-app"
 		userName = "banana"
 		spaceName = "some-space"
 		orgName = "some-org"
 
-		cmd = v3.V3CancelDeploymentCommand{
+		cmd = v3.V3CancelZdtPushCommand{
 			RequiredArgs: flag.AppName{AppName: app},
 
-			UI:          testUI,
-			Config:      fakeConfig,
-			CancelDeploymentActor:       fakeV3CancelDeploymentActor,
-			SharedActor: fakeSharedActor,
+			UI:                 testUI,
+			Config:             fakeConfig,
+			CancelZdtPushActor: fakeV3CancelZdtPushActor,
+			SharedActor:        fakeSharedActor,
 		}
-		fakeV3CancelDeploymentActor.CloudControllerAPIVersionReturns(ccversion.MinVersionApplicationFlowV3)
+		fakeV3CancelZdtPushActor.CloudControllerAPIVersionReturns(ccversion.MinVersionApplicationFlowV3)
 	})
 
 	JustBeforeEach(func() {
@@ -61,7 +61,7 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 
 	Context("when the API version is below the minimum", func() {
 		BeforeEach(func() {
-			fakeV3CancelDeploymentActor.CloudControllerAPIVersionReturns("0.0.0")
+			fakeV3CancelZdtPushActor.CloudControllerAPIVersionReturns("0.0.0")
 		})
 
 		It("returns a MinimumAPIVersionNotMetError", func() {
@@ -75,12 +75,12 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 			Expect(testUI.Err).To(Say("This command is in EXPERIMENTAL stage and may change without notice"))
 		})
 	})
-	
+
 	When("the user is not logged in", func() {
 		var expectedErr error
 
 		BeforeEach(func() {
-			fakeV3CancelDeploymentActor.CloudControllerAPIVersionReturns(ccversion.MinVersionApplicationFlowV3)
+			fakeV3CancelZdtPushActor.CloudControllerAPIVersionReturns(ccversion.MinVersionApplicationFlowV3)
 			expectedErr = errors.New("some current user error")
 			fakeConfig.CurrentUserReturns(configv3.User{}, expectedErr)
 		})
@@ -89,7 +89,6 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 			Expect(executeErr).To(Equal(expectedErr))
 		})
 	})
-
 
 	Context("when checking target fails", func() {
 		BeforeEach(func() {
@@ -111,25 +110,25 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 			fakeConfig.CurrentUserReturns(configv3.User{Name: userName}, nil)
 			fakeConfig.TargetedSpaceReturns(configv3.Space{Name: spaceName, GUID: "some-space-guid"})
 			fakeConfig.TargetedOrganizationReturns(configv3.Organization{Name: orgName, GUID: "some-org-guid"})
-			fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceReturns(v3action.Warnings{"get-warning"}, errors.New("some-error"))
+			fakeV3CancelZdtPushActor.CancelDeploymentByAppNameAndSpaceReturns(v3action.Warnings{"get-warning"}, errors.New("some-error"))
 		})
 
 		It("cancels the deployment", func() {
-			Expect(fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceCallCount()).To(Equal(1))
-			appName, spaceGuid := fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceArgsForCall(0)
+			Expect(fakeV3CancelZdtPushActor.CancelDeploymentByAppNameAndSpaceCallCount()).To(Equal(1))
+			appName, spaceGuid := fakeV3CancelZdtPushActor.CancelDeploymentByAppNameAndSpaceArgsForCall(0)
 			Expect(appName).To(Equal(app))
 			Expect(spaceGuid).To(Equal("some-space-guid"))
 
 			Expect(executeErr).To(MatchError("some-error"))
 			Expect(testUI.Err).To(Say("get-warning"))
 		})
-		
+
 		Context("when the application doesn't exist", func() {
-				var expectedErr error
+			var expectedErr error
 
 			BeforeEach(func() {
 				expectedErr = errors.New("dropped iphone error")
-				fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceReturns(v3action.Warnings{"get-warning"}, expectedErr)
+				fakeV3CancelZdtPushActor.CancelDeploymentByAppNameAndSpaceReturns(v3action.Warnings{"get-warning"}, expectedErr)
 			})
 			It("displays the warnings and error", func() {
 				Expect(executeErr).To(MatchError(expectedErr))

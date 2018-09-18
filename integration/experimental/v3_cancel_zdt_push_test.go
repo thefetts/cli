@@ -9,19 +9,17 @@ import (
 	. "github.com/onsi/gomega/ghttp"
 )
 
-var _ = Describe("v3-cancel-deployment command", func() {
+var _ = Describe("v3-cancel-zdt-push command", func() {
 	var (
-		orgName           string
-		spaceName         string
-		appName           string
-		userName          string
+		orgName   string
+		spaceName string
+		appName   string
 	)
 
 	BeforeEach(func() {
 		orgName = helpers.NewOrgName()
 		spaceName = helpers.NewSpaceName()
 		appName = "cancel-this-app"
-		userName, _ = helpers.GetCredentials()
 		helpers.TurnOffExperimental()
 	})
 
@@ -138,18 +136,15 @@ var _ = Describe("v3-cancel-deployment command", func() {
 	})
 
 	Context("when the environment is set up correctly", func() {
-		var domainName string
 
 		BeforeEach(func() {
 			helpers.SetupCF(orgName, spaceName)
-			domainName = helpers.DefaultSharedDomain()
 		})
 
 		AfterEach(func() {
 			helpers.QuickDeleteOrg(orgName)
 		})
 
-		
 		Context("when the app name is not provided", func() {
 			It("tells the user that the app name is required, prints help text, and exits 1", func() {
 				session := helpers.CF("v3-cancel-zdt-push")
@@ -253,104 +248,44 @@ var _ = Describe("v3-cancel-deployment command", func() {
 			})
 		})
 
-		Context("when the app does not already exist", func() {
-			var session *Session
-
-			BeforeEach(func() {
-				helpers.WithHelloWorldApp(func(appDir string) {
-					session = helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "v3-cancel-zdt-push", appName)
-					Eventually(session).Should(Exit(0))
-				})
-			})
-
-			It("pushes the app", func() {
-				Eventually(session).Should(Say("Creating app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Uploading and creating bits package for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Consistently(session).ShouldNot(Say("Stopping app %s", appName))
-				Eventually(session).Should(Say("Staging package for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say("Setting app %s to droplet .+ in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Mapping routes\\.\\.\\."))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Starting app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Waiting for app to start\\.\\.\\."))
-				Eventually(session).Should(Say("Showing health and status for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("name:\\s+%s", appName))
-				Eventually(session).Should(Say("requested state:\\s+started"))
-				Eventually(session).Should(Say("routes:\\s+%s\\.%s", appName, domainName))
-				Eventually(session).Should(Say("stack:\\s+cflinuxfs2"))
-				Eventually(session).Should(Say("buildpacks:\\s+staticfile"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("type:\\s+web"))
-				Eventually(session).Should(Say("instances:\\s+1/1"))
-				Eventually(session).Should(Say("memory usage:\\s+32M"))
-				Eventually(session).Should(Say(`state\s+since\s+cpu\s+memory\s+disk`))
-				Eventually(session).Should(Say("#0\\s+running\\s+\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} [AP]M"))
-			})
-		})
-
 		Context("when the app exists", func() {
 			var session *Session
+
 			BeforeEach(func() {
 				helpers.WithHelloWorldApp(func(appDir string) {
-					Eventually(helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "v3-cancel-zdt-push", appName)).Should(Exit(0))
-				})
-
-				helpers.WithHelloWorldApp(func(appDir string) {
-					session = helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "v3-cancel-zdt-push", appName, "-b", "https://github.com/cloudfoundry/staticfile-buildpack")
+					session = helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "push", appName)
 					Eventually(session).Should(Exit(0))
 				})
 			})
 
-			It("pushes the app", func() {
-				Eventually(session).Should(Say("Updating app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Uploading and creating bits package for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Staging package for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say("Setting app %s to droplet .+ in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Mapping routes\\.\\.\\."))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Starting app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Starting deployment for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say("OK"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("Waiting for app to start\\.\\.\\."))
-				Eventually(session).Should(Say("Showing health and status for app %s in org %s / space %s as %s\\.\\.\\.", appName, orgName, spaceName, userName))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("name:\\s+%s", appName))
-				Eventually(session).Should(Say("requested state:\\s+started"))
-				Eventually(session).Should(Say("routes:\\s+%s\\.%s", appName, domainName))
-				Eventually(session).Should(Say("stack:\\s+cflinuxfs2"))
+			Context("and it is currently deploying", func() {
+				BeforeEach(func() {
+					// scale up so the deployment takes longer
+					helpers.WithHelloWorldApp(func(appDir string) {
+						session = helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "scale", appName, "-i", "10")
+						Eventually(session).Should(Exit(0))
+					})
 
-				// TODO: Uncomment when capi sorts out droplet buildpack name/detectoutput
-				// Eventually(session).Should(Say("buildpacks:\\s+https://github.com/cloudfoundry/staticfile-buildpack"))
-				Eventually(session).Should(Say(""))
-				Eventually(session).Should(Say("type:\\s+web"))
-				Eventually(session).Should(Say("instances:\\s+1/1"))
-				Eventually(session).Should(Say("memory usage:\\s+32M"))
-				Eventually(session).Should(Say(`state\s+since\s+cpu\s+memory\s+disk`))
-				Eventually(session).Should(Say("#0\\s+running\\s+\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} [AP]M"))
+					helpers.WithHelloWorldApp(func(appDir string) {
+						session = helpers.CustomCF(helpers.CFEnv{WorkingDirectory: appDir}, "v3-zdt-push", appName, "-b", "https://github.com/cloudfoundry/staticfile-buildpack")
+						Eventually(session).Should(Exit(0))
+					})
+				})
+
+				It("cancels the deployment", func() {
+					session := helpers.CF("v3-cancel-zdt-push", appName)
+					Eventually(session).Should(Exit(0))
+					Eventually(session).Should(Say("Deployment cancelled, rolling back"))
+				})
+			})
+
+			Context("when the app has no deployment to cancel", func() {
+				It("errors", func() {
+					session := helpers.CF("v3-cancel-zdt-push", appName)
+					Eventually(session).Should(Exit(1))
+					Eventually(session.Err).Should(Say("failed to find a deployment for that app"))
+				})
 			})
 		})
-
 	})
 })
