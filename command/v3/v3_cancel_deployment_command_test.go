@@ -20,7 +20,7 @@ import (
 
 var _ = Describe("v3-cancel-deployment Command", func() {
 	var (
-		cmd                         v3.CancelDeploymentCommand
+		cmd                         v3.V3CancelDeploymentCommand
 		testUI                      *ui.UI
 		fakeConfig                  *commandfakes.FakeConfig
 		fakeSharedActor             *commandfakes.FakeSharedActor
@@ -44,12 +44,12 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 		spaceName = "some-space"
 		orgName = "some-org"
 
-		cmd = v3.CancelDeploymentCommand{
+		cmd = v3.V3CancelDeploymentCommand{
 			RequiredArgs: flag.AppName{AppName: app},
 
 			UI:          testUI,
 			Config:      fakeConfig,
-			Actor:       fakeV3CancelDeploymentActor,
+			CancelDeploymentActor:       fakeV3CancelDeploymentActor,
 			SharedActor: fakeSharedActor,
 		}
 		fakeV3CancelDeploymentActor.CloudControllerAPIVersionReturns(ccversion.MinVersionApplicationFlowV3)
@@ -75,6 +75,21 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 			Expect(testUI.Err).To(Say("This command is in EXPERIMENTAL stage and may change without notice"))
 		})
 	})
+	
+	When("the user is not logged in", func() {
+		var expectedErr error
+
+		BeforeEach(func() {
+			fakeV3CancelDeploymentActor.CloudControllerAPIVersionReturns(ccversion.MinVersionApplicationFlowV3)
+			expectedErr = errors.New("some current user error")
+			fakeConfig.CurrentUserReturns(configv3.User{}, expectedErr)
+		})
+
+		It("return an error", func() {
+			Expect(executeErr).To(Equal(expectedErr))
+		})
+	})
+
 
 	Context("when checking target fails", func() {
 		BeforeEach(func() {
@@ -103,10 +118,25 @@ var _ = Describe("v3-cancel-deployment Command", func() {
 			Expect(fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceCallCount()).To(Equal(1))
 			appName, spaceGuid := fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceArgsForCall(0)
 			Expect(appName).To(Equal(app))
-			Expect(spaceGuid).To(Equal(spaceName))
+			Expect(spaceGuid).To(Equal("some-space-guid"))
 
 			Expect(executeErr).To(MatchError("some-error"))
 			Expect(testUI.Err).To(Say("get-warning"))
+		})
+		
+		Context("when the application doesn't exist", func() {
+				var expectedErr error
+
+			BeforeEach(func() {
+				expectedErr = errors.New("dropped iphone error")
+				fakeV3CancelDeploymentActor.CancelDeploymentByAppNameAndSpaceReturns(v3action.Warnings{"get-warning"}, expectedErr)
+			})
+			It("displays the warnings and error", func() {
+				Expect(executeErr).To(MatchError(expectedErr))
+
+				Expect(testUI.Err).To(Say("get-warning"))
+				Expect(testUI.Out).ToNot(Say("app some-app in org some-org / space some-space as banana..."))
+			})
 		})
 	})
 })

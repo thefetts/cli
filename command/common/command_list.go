@@ -21,6 +21,7 @@ type commandList struct {
 	App                  v3.AppCommand                  `command:"app" description:"Display health and status for an app"`
 	V3Apps               v3.V3AppsCommand               `command:"v3-apps" description:"List all apps in the target space"`
 	V3ApplyManifest      v3.V3ApplyManifestCommand      `command:"v3-apply-manifest" description:"Applies manifest properties to an application"`
+	V3CancelDeployment   v3.V3CancelDeploymentCommand   `command:"v3-cancel-zdt-push" description:"Cancel the most recent deployment for an app"`
 	V3CreateApp          v3.V3CreateAppCommand          `command:"v3-create-app" description:"Create a V3 App"`
 	V3CreatePackage      v3.V3CreatePackageCommand      `command:"v3-create-package" description:"Uploads a V3 Package"`
 	V3DeleteApp          v3.V3DeleteCommand             `command:"v3-delete" description:"Delete a V3 App"`
@@ -54,7 +55,6 @@ type commandList struct {
 	BindService                        v2.BindServiceCommand                        `command:"bind-service" alias:"bs" description:"Bind a service instance to an app"`
 	BindStagingSecurityGroup           v2.BindStagingSecurityGroupCommand           `command:"bind-staging-security-group" description:"Bind a security group to the list of security groups to be used for staging applications"`
 	Buildpacks                         v2.BuildpacksCommand                         `command:"buildpacks" description:"List all buildpacks"`
-	CancelDeployment                   v3.CancelDeploymentCommand                   `command:"v3-cancel-deployment" description:"Cancel the most recent deployment for an app"`
 	CheckRoute                         v2.CheckRouteCommand                         `command:"check-route" description:"Perform a simple check to determine whether a route currently exists or not"`
 	Config                             v2.ConfigCommand                             `command:"config" description:"Write default values to the config"`
 	CopySource                         v2.CopySourceCommand                         `command:"copy-source" description:"Copies the source code of an application to another existing application (and restarts that application)"`

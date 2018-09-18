@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"errors"
 	"code.cloudfoundry.org/cli/actor/sharedaction"
 	"code.cloudfoundry.org/cli/actor/v3action"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccversion"
@@ -16,36 +17,44 @@ type V3CancelDeploymentActor interface {
 	CloudControllerAPIVersion() string
 }
 
-type CancelDeploymentCommand struct {
-	RequiredArgs flag.AppName
+type V3CancelDeploymentCommand struct {
+	RequiredArgs flag.AppName `positional-args:"yes"`
 	UI           command.UI
 	Config       command.Config
-	Actor        V3CancelDeploymentActor
-	SharedActor  command.SharedActor
+	CancelDeploymentActor        V3CancelDeploymentActor
+	SharedActor  command.SharedActor	
+    usage        interface{} `usage:"CF_NAME v3-cancel-zdt-push APP_NAME"`
 }
 
-func (cmd *CancelDeploymentCommand) Setup(config command.Config, ui command.UI) error {
+func (cmd *V3CancelDeploymentCommand) Setup(config command.Config, ui command.UI) error {
 	cmd.UI = ui
 	cmd.Config = config
+	sharedActor := sharedaction.NewActor(config)
 
-	client, uaaClient, _ := shared.NewClients(config, ui, true, "")
-	// if err != nil {
-	// 	if v3Err, ok := err.(ccerror.V3UnexpectedResponseError); ok && v3Err.ResponseCode == http.StatusNotFound {
-	// 		return translatableerror.MinimumCFAPIVersionNotMetError{MinimumVersion: ccversion.MinVersionApplicationFlowV3}
-	// 	}
-	//
-	// 	return err
-	// }
+	ccClient, uaaClient, err := shared.NewClients(config, ui, true, "")
+	if err != nil {
+		//if v3Err, ok := err.(ccerror.V3UnexpectedResponseError); ok && v3Err.ResponseCode == http.StatusNotFound {
+		//	return translatableerror.MinimumCFAPIVersionNotMetError{MinimumVersion: ccversion.MinVersionApplicationFlowV3}
+		//}
 
-	cmd.Actor = v3action.NewActor(client, config, sharedaction.NewActor(config), uaaClient)
+		return err
+	}
+
+	cmd.CancelDeploymentActor = v3action.NewActor(ccClient, config, sharedActor, uaaClient)
+	cmd.SharedActor = sharedActor
 
 	return nil
 }
 
-func (cmd CancelDeploymentCommand) Execute(args []string) error {
+func (cmd V3CancelDeploymentCommand) Execute(args []string) error {
 	cmd.UI.DisplayWarning(command.ExperimentalWarning)
 
-	err := command.MinimumCCAPIVersionCheck(cmd.Actor.CloudControllerAPIVersion(), ccversion.MinVersionApplicationFlowV3)
+	err := cmd.validateArgs()
+	if err != nil {
+		return err
+	}
+
+	err = command.MinimumCCAPIVersionCheck(cmd.CancelDeploymentActor.CloudControllerAPIVersion(), ccversion.MinVersionApplicationFlowV3)
 	if err != nil {
 		return err
 	}
@@ -54,8 +63,19 @@ func (cmd CancelDeploymentCommand) Execute(args []string) error {
 		return err
 	}
 
-	warnings, err := cmd.Actor.CancelDeploymentByAppNameAndSpace(cmd.RequiredArgs.AppName, cmd.Config.TargetedSpace().Name)
-	cmd.UI.DisplayWarnings(warnings)
+	_, err = cmd.Config.CurrentUser()
+	if err != nil {
+		return err
+	}
 
+	warnings, err := cmd.CancelDeploymentActor.CancelDeploymentByAppNameAndSpace(cmd.RequiredArgs.AppName, cmd.Config.TargetedSpace().GUID)
+	cmd.UI.DisplayWarnings(warnings)
 	return err
+}
+
+func (cmd V3CancelDeploymentCommand) validateArgs() error {
+	if cmd.RequiredArgs.AppName == "" {
+		return errors.New("No app name given")
+	}
+	return nil
 }
